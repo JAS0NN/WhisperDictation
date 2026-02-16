@@ -1,0 +1,17 @@
+# Build artifacts
+build/
+DerivedData/
+
+# Xcode
+*.xcuserstate
+*.xcuserdatad
+xcuserdata/
+
+# whisper.xcframework (build from whisper.cpp)
+whisper.xcframework
+
+# Model files (download separately)
+WhisperDictation/Resources/models/*.bin
+
+# macOS
+.DS_Store

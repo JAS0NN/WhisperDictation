@@ -1,0 +1,366 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		DA2001000000000000000001 /* WhisperDictationApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1001000000000000000001 /* WhisperDictationApp.swift */; };
+		DA2001000000000000000002 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1001000000000000000002 /* AppState.swift */; };
+		DA2001000000000000000003 /* HotkeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1001000000000000000003 /* HotkeyManager.swift */; };
+		DA2001000000000000000004 /* AudioRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1001000000000000000004 /* AudioRecorder.swift */; };
+		DA2001000000000000000005 /* WhisperTranscriber.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1001000000000000000005 /* WhisperTranscriber.swift */; };
+		DA2001000000000000000006 /* TextInserter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1001000000000000000006 /* TextInserter.swift */; };
+		DA2001000000000000000007 /* LibWhisper.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1001000000000000000007 /* LibWhisper.swift */; };
+		DA2001000000000000000008 /* RiffWaveUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1001000000000000000008 /* RiffWaveUtils.swift */; };
+		DA200100000000000000000B /* whisper.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA100100000000000000000B /* whisper.xcframework */; };
+		DA200100000000000000000C /* whisper.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = DA100100000000000000000B /* whisper.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		DA200100000000000000000E /* models in Resources */ = {isa = PBXBuildFile; fileRef = DA100100000000000000000E /* models */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		DA4001000000000000000004 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				DA200100000000000000000C /* whisper.xcframework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		DA1001000000000000000001 /* WhisperDictationApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhisperDictationApp.swift; sourceTree = "<group>"; };
+		DA1001000000000000000002 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+		DA1001000000000000000003 /* HotkeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyManager.swift; sourceTree = "<group>"; };
+		DA1001000000000000000004 /* AudioRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecorder.swift; sourceTree = "<group>"; };
+		DA1001000000000000000005 /* WhisperTranscriber.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhisperTranscriber.swift; sourceTree = "<group>"; };
+		DA1001000000000000000006 /* TextInserter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextInserter.swift; sourceTree = "<group>"; };
+		DA1001000000000000000007 /* LibWhisper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibWhisper.swift; sourceTree = "<group>"; };
+		DA1001000000000000000008 /* RiffWaveUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RiffWaveUtils.swift; sourceTree = "<group>"; };
+		DA100100000000000000000A /* WhisperDictation.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WhisperDictation.entitlements; sourceTree = "<group>"; };
+		DA100100000000000000000B /* whisper.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = whisper.xcframework; path = whisper.xcframework; sourceTree = SOURCE_ROOT; };
+		DA100100000000000000000C /* WhisperDictation.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WhisperDictation.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DA100100000000000000000D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		DA100100000000000000000E /* models */ = {isa = PBXFileReference; lastKnownFileType = folder; path = models; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		DA4001000000000000000002 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DA200100000000000000000B /* whisper.xcframework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		DA3001000000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				DA3001000000000000000002 /* WhisperDictation */,
+				DA3001000000000000000003 /* Products */,
+				DA3001000000000000000004 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		DA3001000000000000000002 /* WhisperDictation */ = {
+			isa = PBXGroup;
+			children = (
+				DA1001000000000000000001 /* WhisperDictationApp.swift */,
+				DA1001000000000000000002 /* AppState.swift */,
+				DA1001000000000000000003 /* HotkeyManager.swift */,
+				DA1001000000000000000004 /* AudioRecorder.swift */,
+				DA1001000000000000000005 /* WhisperTranscriber.swift */,
+				DA1001000000000000000006 /* TextInserter.swift */,
+				DA1001000000000000000007 /* LibWhisper.swift */,
+				DA1001000000000000000008 /* RiffWaveUtils.swift */,
+				DA100100000000000000000A /* WhisperDictation.entitlements */,
+				DA100100000000000000000D /* Info.plist */,
+				DA3001000000000000000005 /* Resources */,
+			);
+			path = WhisperDictation;
+			sourceTree = "<group>";
+		};
+		DA3001000000000000000003 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				DA100100000000000000000C /* WhisperDictation.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		DA3001000000000000000004 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				DA100100000000000000000B /* whisper.xcframework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		DA3001000000000000000005 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				DA100100000000000000000E /* models */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		DA5001000000000000000001 /* WhisperDictation */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DA7001000000000000000002 /* Build configuration list for PBXNativeTarget "WhisperDictation" */;
+			buildPhases = (
+				DA4001000000000000000001 /* Sources */,
+				DA4001000000000000000002 /* Frameworks */,
+				DA4001000000000000000003 /* Resources */,
+				DA4001000000000000000004 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = WhisperDictation;
+			packageProductDependencies = (
+			);
+			productName = WhisperDictation;
+			productReference = DA100100000000000000000C /* WhisperDictation.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		DA6001000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					DA5001000000000000000001 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = DA7001000000000000000001 /* Build configuration list for PBXProject "WhisperDictation" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = DA3001000000000000000001;
+			productRefGroup = DA3001000000000000000003 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				DA5001000000000000000001 /* WhisperDictation */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		DA4001000000000000000003 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DA200100000000000000000E /* models in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		DA4001000000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DA2001000000000000000001 /* WhisperDictationApp.swift in Sources */,
+				DA2001000000000000000002 /* AppState.swift in Sources */,
+				DA2001000000000000000003 /* HotkeyManager.swift in Sources */,
+				DA2001000000000000000004 /* AudioRecorder.swift in Sources */,
+				DA2001000000000000000005 /* WhisperTranscriber.swift in Sources */,
+				DA2001000000000000000006 /* TextInserter.swift in Sources */,
+				DA2001000000000000000007 /* LibWhisper.swift in Sources */,
+				DA2001000000000000000008 /* RiffWaveUtils.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		DA8001000000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		DA8001000000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		DA8001000000000000000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = WhisperDictation/WhisperDictation.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = WhisperDictation/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.whisper.dictation;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		DA8001000000000000000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = WhisperDictation/WhisperDictation.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = WhisperDictation/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
+				LLVM_LTO = YES;
+				MARKETING_VERSION = 1.0;
+				OTHER_CFLAGS = (
+					"-O3",
+					"-DNDEBUG",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.whisper.dictation;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		DA7001000000000000000001 /* Build configuration list for PBXProject "WhisperDictation" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DA8001000000000000000001 /* Debug */,
+				DA8001000000000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DA7001000000000000000002 /* Build configuration list for PBXNativeTarget "WhisperDictation" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DA8001000000000000000003 /* Debug */,
+				DA8001000000000000000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = DA6001000000000000000001 /* Project object */;
+}
