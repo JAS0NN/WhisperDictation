@@ -16,40 +16,39 @@ macOS 原生語音輸入工具 — 住在 menubar，按住快捷鍵錄音、放�
 
 - macOS 13.0+
 - Xcode 15.0+
-- [whisper.cpp](https://github.com/ggerganov/whisper.cpp) （用來編譯 xcframework）
+- CMake (`brew install cmake`)
 
-## Setup
-
-### 1. Clone whisper.cpp 並下載模型
+## Quick Start
 
 ```bash
-git clone https://github.com/ggerganov/whisper.cpp.git
-cd whisper.cpp
-bash models/download-ggml-model.sh base.en
+# 1. Clone (含 whisper.cpp submodule)
+git clone --recursive https://github.com/YOUR_USERNAME/WhisperDictation.git
+cd WhisperDictation
+
+# 2. 一鍵 setup（下載模型 + 編譯 xcframework）
+./setup.sh
+
+# 3. 用 Xcode 打開並運行
+open WhisperDictation.xcodeproj
+# ⌘R 運行
 ```
 
-### 2. 執行 setup script
-
+使用其他模型（更大 = 更準確，但更慢）：
 ```bash
-cd /path/to/WhisperDictation
-chmod +x setup.sh
-./setup.sh /path/to/whisper.cpp
+./setup.sh small    # 或 tiny, base, medium, large
 ```
 
-這會自動：
-- 編譯 `whisper.xcframework`
-- 複製 xcframework 和模型檔到專案中
-
-### 3. Build & Run
-
-1. 開啟 `WhisperDictation.xcodeproj`
-2. `⌘R` 運行
-
-### 4. 授權
+## 首次運行授權
 
 首次運行需要在 **System Settings** 中授權：
-- **Privacy & Security → Input Monitoring** ✅
-- **Privacy & Security → Accessibility** ✅
+
+| 權限 | 位置 | 用途 |
+|------|------|------|
+| **Input Monitoring** | Privacy & Security → Input Monitoring | 監聽全域快捷鍵 |
+| **Accessibility** | Privacy & Security → Accessibility | 模擬 Cmd+V 貼上 |
+| **Microphone** | Privacy & Security → Microphone | 錄音 |
+
+> ⚠️ 授權後需要**重啟 App** 才生效。
 
 ## 使用方式
 
