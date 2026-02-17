@@ -20,13 +20,13 @@ actor WhisperContext {
     func fullTranscribe(samples: [Float]) {
         let maxThreads = max(1, min(8, cpuCount() - 2))
         var params = whisper_full_default_params(WHISPER_SAMPLING_GREEDY)
-        "en".withCString { en in
+        "auto".withCString { lang in
             params.print_realtime   = true
             params.print_progress   = false
             params.print_timestamps = true
             params.print_special    = false
             params.translate        = false
-            params.language         = en
+            params.language         = lang
             params.n_threads        = Int32(maxThreads)
             params.offset_ms        = 0
             params.no_context       = true

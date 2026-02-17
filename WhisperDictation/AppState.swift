@@ -47,7 +47,7 @@ class AppState: ObservableObject {
     }
 
     func loadModelFromBundle() {
-        if let modelPath = Bundle.main.url(forResource: "ggml-base.en", withExtension: "bin", subdirectory: "models") {
+        if let modelPath = Bundle.main.url(forResource: "ggml-breeze-asr25", withExtension: "bin", subdirectory: "models") {
             Task {
                 await transcriber.loadModel(path: modelPath.path())
                 statusMessage = "Ready — Hold Left Ctrl + Left Option to record"

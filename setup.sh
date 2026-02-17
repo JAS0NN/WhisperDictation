@@ -29,7 +29,7 @@ cp -R "$WHISPER_CPP_DIR/build-apple/whisper.xcframework" "$SCRIPT_DIR/whisper.xc
 
 echo "📋 Copying model..."
 mkdir -p "$SCRIPT_DIR/WhisperDictation/Resources/models"
-cp "$WHISPER_CPP_DIR/models/ggml-$MODEL.bin" "$SCRIPT_DIR/WhisperDictation/Resources/models/"
+cp "$WHISPER_CPP_DIR/models/ggml-$MODEL.bin" "$SCRIPT_DIR/WhisperDictation/Resources/models/ggml-breeze-asr25.bin"
 
 echo ""
 echo "✅ Setup complete!"
