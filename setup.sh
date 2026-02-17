@@ -73,18 +73,45 @@ mkdir -p "$FRAMEWORK_DIR/Versions/A/Modules"
 mkdir -p "$FRAMEWORK_DIR/Versions/A/Resources"
 
 # Combine static libraries
-COREML_LIB="$BUILD_DIR/src/libwhisper.coreml.a"
-LIBS=(
-    "$BUILD_DIR/src/libwhisper.a"
-    "$BUILD_DIR/ggml/src/libggml.a"
-    "$BUILD_DIR/ggml/src/libggml-base.a"
-    "$BUILD_DIR/ggml/src/libggml-cpu.a"
-    "$BUILD_DIR/ggml/src/ggml-metal/libggml-metal.a"
-    "$BUILD_DIR/ggml/src/ggml-blas/libggml-blas.a"
-)
-if [ -f "$COREML_LIB" ]; then
+COREML_LIB=""
+if [ -f "$BUILD_DIR/src/Release/libwhisper.coreml.a" ]; then
+    COREML_LIB="$BUILD_DIR/src/Release/libwhisper.coreml.a"
+elif [ -f "$BUILD_DIR/src/libwhisper.coreml.a" ]; then
+    COREML_LIB="$BUILD_DIR/src/libwhisper.coreml.a"
+fi
+
+# Helper to find lib
+find_lib() {
+    local name=$1
+    if [ -f "$BUILD_DIR/$name" ]; then echo "$BUILD_DIR/$name"; return 0; fi
+    # Check Release/ subdir (Xcode generator)
+    local dir=$(dirname "$name")
+    local base=$(basename "$name")
+    if [ -f "$BUILD_DIR/$dir/Release/$base" ]; then echo "$BUILD_DIR/$dir/Release/$base"; return 0; fi
+    return 1
+}
+
+LIBS=()
+for lib in \
+    "src/libwhisper.a" \
+    "ggml/src/libggml.a" \
+    "ggml/src/libggml-base.a" \
+    "ggml/src/libggml-cpu.a" \
+    "ggml/src/ggml-metal/libggml-metal.a" \
+    "ggml/src/ggml-blas/libggml-blas.a"
+do
+    FOUND=$(find_lib "$lib")
+    if [ -n "$FOUND" ]; then
+        LIBS+=("$FOUND")
+    else
+        echo "⚠️  Warning: Library not found: $lib"
+    fi
+done
+
+if [ -n "$COREML_LIB" ]; then
     LIBS+=("$COREML_LIB")
 fi
+
 libtool -static -o "$BUILD_DIR/combined.a" "${LIBS[@]}" 2>/dev/null
 
 # Create dynamic library
