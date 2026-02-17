@@ -5,7 +5,7 @@ macOS 原生語音輸入工具 — 住在 menubar，按住快捷鍵錄音、放�
 
 基於 [whisper.cpp](https://github.com/ggerganov/whisper.cpp)，完全本地端處理，不傳送任何資料到雲端。
 
-## Features
+## 功能
 
 - **全域快捷鍵** — 按住 `Left Ctrl + Left Option` 錄音，放開自動轉寫
 - **ESC 取消** — 錄音途中按 ESC 可取消
@@ -19,11 +19,11 @@ macOS 原生語音輸入工具 — 住在 menubar，按住快捷鍵錄音、放�
 - Xcode 15.0+
 - CMake (`brew install cmake`)
 
-## Installation
+## 安裝
 
 以下步驟說明如何安裝並快速開始使用應用：
 
-1. **Clone** repository（含 whisper.cpp submodule）
+1. **Clone** 儲存庫（包含 whisper.cpp 子模組）
    ```bash
    git clone --recursive https://github.com/YOUR_USERNAME/WhisperDictation.git
    cd WhisperDictation
@@ -37,10 +37,10 @@ macOS 原生語音輸入工具 — 住在 menubar，按住快捷鍵錄音、放�
    open WhisperDictation.xcodeproj
    ```
 
-## Quick Start
+## 快速開始
 
 ```bash
-# 1. Clone (含 whisper.cpp submodule)
+# 1. Clone（含 whisper.cpp 子模組）
 git clone --recursive https://github.com/YOUR_USERNAME/WhisperDictation.git
 cd WhisperDictation
 
@@ -91,6 +91,6 @@ WhisperDictation/
 └── RiffWaveUtils.swift         # WAV 解碼
 ```
 
-## License
+## 授權
 
 MIT
