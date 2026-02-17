@@ -7,11 +7,25 @@ DerivedData/
 *.xcuserdatad
 xcuserdata/
 
-# whisper.xcframework (build from whisper.cpp)
+# whisper.xcframework (built from whisper.cpp)
 whisper.xcframework
 
-# Model files (download separately)
+# Model files (too large for git)
 WhisperDictation/Resources/models/*.bin
+WhisperDictation/Resources/models/*.mlmodelc
+
+# Python virtual environment
+.venv/
+
+# Temporary files from setup
+.breeze-asr25-tmp/
+
+# whisper.cpp build artifacts
+whisper.cpp/build-macos/
+whisper.cpp/build-macos-coreml/
+whisper.cpp/models/*.mlpackage
+whisper.cpp/models/*.mlmodelc
+whisper.cpp/models/hf-*.pt
 
 # macOS
 .DS_Store
