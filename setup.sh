@@ -37,99 +37,81 @@ if [ ! -f "$WHISPER_CPP_DIR/CMakeLists.txt" ]; then
     exit 1
 fi
 
-# ─── Detect build environment ───
-
-HAS_XCODE=false
-if xcodebuild -version &>/dev/null && xcrun --sdk iphoneos --show-sdk-path &>/dev/null 2>&1; then
-    HAS_XCODE=true
-fi
-
-# ─── Build whisper framework ───
+# ─── Build whisper framework (macOS arm64 only) ───
 
 cd "$WHISPER_CPP_DIR"
 
-if $HAS_XCODE; then
-    # Full Xcode available — build xcframework for all platforms
-    echo "📦 Building whisper.xcframework (Xcode detected)..."
-    ./build-xcframework.sh
+echo "📦 Building whisper.framework for macOS arm64..."
 
-    echo ""
-    echo "📋 Copying xcframework..."
-    cp -R "$WHISPER_CPP_DIR/build-apple/whisper.xcframework" "$SCRIPT_DIR/whisper.xcframework"
-else
-    # Command Line Tools only — build macOS framework with CMake
-    echo "📦 Building whisper.framework for macOS (Command Line Tools only)..."
-    echo "   (No full Xcode detected — building macOS arm64 only)"
+BUILD_DIR="build-macos"
 
-    BUILD_DIR="build-macos"
+cmake -B "$BUILD_DIR" \
+    -DCMAKE_OSX_DEPLOYMENT_TARGET=14.0 \
+    -DCMAKE_OSX_ARCHITECTURES="arm64" \
+    -DBUILD_SHARED_LIBS=OFF \
+    -DWHISPER_BUILD_EXAMPLES=OFF \
+    -DWHISPER_BUILD_TESTS=OFF \
+    -DWHISPER_BUILD_SERVER=OFF \
+    -DGGML_METAL=ON \
+    -DGGML_METAL_EMBED_LIBRARY=ON \
+    -DGGML_BLAS_DEFAULT=ON \
+    -DGGML_METAL_USE_BF16=ON \
+    -DGGML_OPENMP=OFF \
+    -DWHISPER_COREML=ON \
+    -DWHISPER_COREML_ALLOW_FALLBACK=ON \
+    -S .
 
-    cmake -B "$BUILD_DIR" \
-        -DCMAKE_OSX_DEPLOYMENT_TARGET=14.0 \
-        -DCMAKE_OSX_ARCHITECTURES="arm64" \
-        -DBUILD_SHARED_LIBS=OFF \
-        -DWHISPER_BUILD_EXAMPLES=OFF \
-        -DWHISPER_BUILD_TESTS=OFF \
-        -DWHISPER_BUILD_SERVER=OFF \
-        -DGGML_METAL=ON \
-        -DGGML_METAL_EMBED_LIBRARY=ON \
-        -DGGML_BLAS_DEFAULT=ON \
-        -DGGML_METAL_USE_BF16=ON \
-        -DGGML_OPENMP=OFF \
-        -DWHISPER_COREML=ON \
-        -DWHISPER_COREML_ALLOW_FALLBACK=ON \
-        -S .
+cmake --build "$BUILD_DIR" --config Release -j"$(sysctl -n hw.ncpu)"
 
-    cmake --build "$BUILD_DIR" --config Release -j"$(sysctl -n hw.ncpu)"
+echo ""
+echo "📋 Assembling whisper.framework..."
 
-    echo ""
-    echo "📋 Assembling whisper.framework..."
+FRAMEWORK_DIR="$SCRIPT_DIR/whisper.xcframework/macos-arm64/whisper.framework"
+rm -rf "$FRAMEWORK_DIR"
+mkdir -p "$FRAMEWORK_DIR/Versions/A/Headers"
+mkdir -p "$FRAMEWORK_DIR/Versions/A/Modules"
+mkdir -p "$FRAMEWORK_DIR/Versions/A/Resources"
 
-    FRAMEWORK_DIR="$SCRIPT_DIR/whisper.xcframework/macos-arm64/whisper.framework"
-    rm -rf "$FRAMEWORK_DIR"
-    mkdir -p "$FRAMEWORK_DIR/Versions/A/Headers"
-    mkdir -p "$FRAMEWORK_DIR/Versions/A/Modules"
-    mkdir -p "$FRAMEWORK_DIR/Versions/A/Resources"
+# Combine static libraries
+COREML_LIB="$BUILD_DIR/src/libwhisper.coreml.a"
+LIBS=(
+    "$BUILD_DIR/src/libwhisper.a"
+    "$BUILD_DIR/ggml/src/libggml.a"
+    "$BUILD_DIR/ggml/src/libggml-base.a"
+    "$BUILD_DIR/ggml/src/libggml-cpu.a"
+    "$BUILD_DIR/ggml/src/ggml-metal/libggml-metal.a"
+    "$BUILD_DIR/ggml/src/ggml-blas/libggml-blas.a"
+)
+if [ -f "$COREML_LIB" ]; then
+    LIBS+=("$COREML_LIB")
+fi
+libtool -static -o "$BUILD_DIR/combined.a" "${LIBS[@]}" 2>/dev/null
 
-    # Combine static libraries
-    COREML_LIB="$BUILD_DIR/src/libwhisper.coreml.a"
-    LIBS=(
-        "$BUILD_DIR/src/libwhisper.a"
-        "$BUILD_DIR/ggml/src/libggml.a"
-        "$BUILD_DIR/ggml/src/libggml-base.a"
-        "$BUILD_DIR/ggml/src/libggml-cpu.a"
-        "$BUILD_DIR/ggml/src/ggml-metal/libggml-metal.a"
-        "$BUILD_DIR/ggml/src/ggml-blas/libggml-blas.a"
-    )
-    if [ -f "$COREML_LIB" ]; then
-        LIBS+=("$COREML_LIB")
-    fi
-    libtool -static -o "$BUILD_DIR/combined.a" "${LIBS[@]}" 2>/dev/null
+# Create dynamic library
+LINK_FRAMEWORKS="-framework Foundation -framework Metal -framework Accelerate"
+if [ -f "$COREML_LIB" ]; then
+    LINK_FRAMEWORKS="$LINK_FRAMEWORKS -framework CoreML"
+fi
 
-    # Create dynamic library
-    LINK_FRAMEWORKS="-framework Foundation -framework Metal -framework Accelerate"
-    if [ -f "$COREML_LIB" ]; then
-        LINK_FRAMEWORKS="$LINK_FRAMEWORKS -framework CoreML"
-    fi
+xcrun clang++ -dynamiclib \
+    -isysroot "$(xcrun --show-sdk-path)" \
+    -arch arm64 \
+    -mmacosx-version-min=14.0 \
+    -Wl,-force_load,"$BUILD_DIR/combined.a" \
+    $LINK_FRAMEWORKS \
+    -lstdc++ \
+    -install_name "@rpath/whisper.framework/Versions/Current/whisper" \
+    -o "$FRAMEWORK_DIR/Versions/A/whisper"
 
-    xcrun clang++ -dynamiclib \
-        -isysroot "$(xcrun --show-sdk-path)" \
-        -arch arm64 \
-        -mmacosx-version-min=14.0 \
-        -Wl,-force_load,"$BUILD_DIR/combined.a" \
-        $LINK_FRAMEWORKS \
-        -lstdc++ \
-        -install_name "@rpath/whisper.framework/Versions/Current/whisper" \
-        -o "$FRAMEWORK_DIR/Versions/A/whisper"
+# Copy headers
+cp include/whisper.h "$FRAMEWORK_DIR/Versions/A/Headers/"
+cp ggml/include/ggml.h ggml/include/ggml-alloc.h ggml/include/ggml-backend.h \
+   ggml/include/gguf.h "$FRAMEWORK_DIR/Versions/A/Headers/"
+cp ggml/include/ggml-metal.h ggml/include/ggml-cpu.h \
+   ggml/include/ggml-blas.h "$FRAMEWORK_DIR/Versions/A/Headers/"
 
-    # Copy headers
-    cp include/whisper.h "$FRAMEWORK_DIR/Versions/A/Headers/"
-    cp ggml/include/ggml.h ggml/include/ggml-alloc.h ggml/include/ggml-backend.h \
-       ggml/include/gguf.h "$FRAMEWORK_DIR/Versions/A/Headers/"
-    cp ggml/include/ggml-metal.h ggml/include/ggml-cpu.h \
-       ggml/include/ggml-blas.h "$FRAMEWORK_DIR/Versions/A/Headers/"
-
-    # Create module map
-    cat > "$FRAMEWORK_DIR/Versions/A/Modules/module.modulemap" << 'MODULEMAP'
+# Create module map
+cat > "$FRAMEWORK_DIR/Versions/A/Modules/module.modulemap" << 'MODULEMAP'
 framework module whisper {
     header "whisper.h"
     header "ggml.h"
@@ -149,8 +131,8 @@ framework module whisper {
 }
 MODULEMAP
 
-    # Create Info.plist
-    cat > "$FRAMEWORK_DIR/Versions/A/Resources/Info.plist" << 'PLIST'
+# Create Info.plist
+cat > "$FRAMEWORK_DIR/Versions/A/Resources/Info.plist" << 'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -165,17 +147,16 @@ MODULEMAP
 </plist>
 PLIST
 
-    # Create versioned symlinks
-    cd "$FRAMEWORK_DIR"
-    ln -sf A Versions/Current
-    ln -sf Versions/Current/Headers Headers
-    ln -sf Versions/Current/Modules Modules
-    ln -sf Versions/Current/Resources Resources
-    ln -sf Versions/Current/whisper whisper
-    cd "$WHISPER_CPP_DIR"
+# Create versioned symlinks
+cd "$FRAMEWORK_DIR"
+ln -sf A Versions/Current
+ln -sf Versions/Current/Headers Headers
+ln -sf Versions/Current/Modules Modules
+ln -sf Versions/Current/Resources Resources
+ln -sf Versions/Current/whisper whisper
+cd "$WHISPER_CPP_DIR"
 
-    echo "✅ whisper.framework built at: $FRAMEWORK_DIR"
-fi
+echo "✅ whisper.framework built at: $FRAMEWORK_DIR"
 
 # ─── Model setup ───
 
@@ -273,7 +254,7 @@ if $USE_COREML; then
         if ! $PYTHON3 -c "import coremltools, torch, transformers" 2>/dev/null; then
             echo "📦 Installing CoreML conversion dependencies..."
             echo "   (torch, coremltools, transformers, openai-whisper)"
-            $PYTHON3 -m pip install 'torch>=2.1' coremltools openai-whisper transformers 'numpy<2'
+            $PYTHON3 -m pip install 'torch>=2.1' coremltools openai-whisper transformers ane_transformers 'numpy<2'
         fi
 
         # Convert HuggingFace model → CoreML .mlpackage
@@ -317,12 +298,10 @@ echo "════════════════════════�
 echo "  ✅ Setup complete!"
 echo "════════════════════════════════════════════════════════"
 echo ""
-if $HAS_XCODE; then
-    echo "  Option A — Xcode:"
-    echo "    open WhisperDictation.xcodeproj   # then ⌘R"
-    echo ""
-fi
-echo "  Option B — Command line (no Xcode needed):"
+echo "  Option A — Xcode:"
+echo "    open WhisperDictation.xcodeproj   # then ⌘R"
+echo ""
+echo "  Option B — Command line:"
 echo "    ./build.sh"
 echo "    open build/WhisperDictation.app"
 echo ""

@@ -21,7 +21,7 @@ macOS 原生語音輸入工具 — 住在 menubar，按住快捷鍵錄音、放�
 - CMake（`brew install cmake`）
 - Python 3（模型轉換需要）
 
-> 不需要完整 Xcode app。如果你有裝 Xcode，`setup.sh` 會自動利用它來 build 全平台 xcframework。
+> 不需要完整 Xcode app。`setup.sh` 會自動使用 CMake (Command Line Tools) 來編譯 macOS 專用的 framework。
 
 ## 快速安裝
 
