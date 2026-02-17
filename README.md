@@ -16,45 +16,30 @@ macOS 原生語音輸入工具 — 住在 menubar，按住快捷鍵錄音、放�
 ## 環境需求
 
 - macOS 13.0+
-- Xcode 15.0+
+- [Xcode](https://developer.apple.com/xcode/) 15.0+（需要完整 Xcode app，不能只有 Command Line Tools）
 - CMake (`brew install cmake`)
+- Python 3（預設 BreezeASR25 模型需要）
 
-## Installation
-
-以下步驟說明如何安裝並快速開始使用應用：
-
-1. **Clone** repository（含 whisper.cpp submodule）
-   ```bash
-   git clone --recursive https://github.com/YOUR_USERNAME/WhisperDictation.git
-   cd WhisperDictation
-   ```
-2. **Setup**：下載模型並編譯 xcframework
-   ```bash
-   ./setup.sh
-   ```
-3. **Run**：使用 Xcode 打開並運行
-   ```bash
-   open WhisperDictation.xcodeproj
-   ```
-
-## Quick Start
+## 安裝
 
 ```bash
-# 1. Clone (含 whisper.cpp submodule)
-git clone --recursive https://github.com/YOUR_USERNAME/WhisperDictation.git
+# 1. Clone（含 whisper.cpp submodule）
+git clone --recursive https://github.com/JAS0NN/WhisperDictation.git
 cd WhisperDictation
 
-# 2. 一鍵 setup（下載模型 + 編譯 xcframework）
+# 2. 一鍵 setup（編譯 xcframework + 下載模型）
 ./setup.sh
 
-# 3. 用 Xcode 打開並運行
+# 3. 用 Xcode 打開並運行（⌘R）
 open WhisperDictation.xcodeproj
-# ⌘R 運行
 ```
 
-使用其他模型（更大 = 更準確，但更慢）：
+預設會下載 [BreezeASR25](https://huggingface.co/MediaTek-Research/Breeze-ASR-25) 多語言模型（~3GB），setup 過程會自動安裝所需 Python 套件（`transformers`、`safetensors`、`huggingface-hub`、`openai-whisper`）。
+
+使用官方 Whisper 模型（較小、僅英文）：
 ```bash
-./setup.sh small    # 或 tiny, base, medium, large
+./setup.sh --official          # 預設 base.en
+./setup.sh --official small    # 或 tiny, base, medium, large
 ```
 
 ## 首次運行授權

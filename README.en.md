@@ -13,51 +13,36 @@ Based on [whisper.cpp](https://github.com/ggerganov/whisper.cpp), fully local pr
 - **Does not steal focus** — App stays in background
 - **Menubar App** — No Dock icon
 
-## Environment Requirements
+## Requirements
 
 - macOS 13.0+
-- Xcode 15.0+
+- [Xcode](https://developer.apple.com/xcode/) 15.0+ (full Xcode app required, Command Line Tools alone are not sufficient)
 - CMake (`brew install cmake`)
+- Python 3 (needed for the default BreezeASR25 model)
 
 ## Installation
 
-The steps below explain how to install and quickly start the app:
-
-1. **Clone** repository (includes whisper.cpp submodule)
-   ```bash
-   git clone --recursive https://github.com/YOUR_USERNAME/WhisperDictation.git
-   cd WhisperDictation
-   ```
-2. **Setup**: download model and build xcframework
-   ```bash
-   ./setup.sh
-   ```
-3. **Run**: open with Xcode and run
-   ```bash
-   open WhisperDictation.xcodeproj
-   ```
-
-## Quick Start
-
 ```bash
 # 1. Clone (includes whisper.cpp submodule)
-git clone --recursive https://github.com/YOUR_USERNAME/WhisperDictation.git
+git clone --recursive https://github.com/JAS0NN/WhisperDictation.git
 cd WhisperDictation
 
-# 2. One‑click setup (download model + compile xcframework)
+# 2. One-click setup (build xcframework + download model)
 ./setup.sh
 
-# 3. Open with Xcode and run
+# 3. Open with Xcode and run (Cmd+R)
 open WhisperDictation.xcodeproj
-# ⌘R to run
 ```
 
-Use other models (larger = more accurate, slower):
+By default this downloads the [BreezeASR25](https://huggingface.co/MediaTek-Research/Breeze-ASR-25) multilingual model (~3GB). The setup script will automatically install required Python packages (`transformers`, `safetensors`, `huggingface-hub`, `openai-whisper`).
+
+To use an official Whisper model instead (smaller, English-only):
 ```bash
-./setup.sh small    # or tiny, base, medium, large
+./setup.sh --official          # defaults to base.en
+./setup.sh --official small    # or tiny, base, medium, large
 ```
 
-## First‑time Authorization
+## First-time Authorization
 
 The app needs permissions in **System Settings**:
 
@@ -74,7 +59,7 @@ The app needs permissions in **System Settings**:
 | Action | Result |
 |--------|--------|
 | **Hold Left Ctrl + Left Option** | Start recording |
-| **Release any key** | Stop recording → auto‑transcribe → paste |
+| **Release any key** | Stop recording → auto-transcribe → paste |
 | **ESC** | Cancel recording |
 
 ## Architecture
