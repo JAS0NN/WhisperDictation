@@ -4,7 +4,6 @@
 # Usage:
 #   ./setup.sh                  # Default: BreezeASR25 model
 #   ./setup.sh --official       # Use official whisper model (e.g. base.en)
-#   ./setup.sh --official small # Use a specific official model
 #   ./setup.sh --coreml         # Also convert CoreML model for Neural Engine acceleration
 
 set -e
@@ -13,7 +12,27 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 WHISPER_CPP_DIR="$SCRIPT_DIR/whisper.cpp"
 MODELS_OUT="$SCRIPT_DIR/WhisperDictation/Resources/models"
 
-# Parse flags
+# ─── Python Environment (uv) ───
+
+# Ensure uv is installed
+if ! command -v uv &>/dev/null; then
+    echo "📦 Installing uv..."
+    pip3 install uv || { echo "❌ Failed to install uv via pip3. Please install it manually."; exit 1; }
+fi
+
+# Create venv if needed
+if [ ! -d "$SCRIPT_DIR/.venv" ]; then
+    echo "🐍 Creating virtual environment with uv..."
+    uv venv "$SCRIPT_DIR/.venv"
+fi
+
+EXT_PYTHON="$SCRIPT_DIR/.venv/bin/python3"
+# Helper to install python deps inside venv
+uv_install() {
+    uv pip install -p "$EXT_PYTHON" "$@"
+}
+
+# ─── Parse flags ───
 USE_COREML=false
 USE_OFFICIAL=false
 OFFICIAL_MODEL=""
@@ -40,10 +59,14 @@ fi
 # ─── Build whisper framework (macOS arm64 only) ───
 
 cd "$WHISPER_CPP_DIR"
-
 echo "📦 Building whisper.framework for macOS arm64..."
 
 BUILD_DIR="build-macos"
+
+CMAKE_COREML_FLAG="OFF"
+if $USE_COREML; then
+    CMAKE_COREML_FLAG="ON"
+fi
 
 cmake -B "$BUILD_DIR" \
     -DCMAKE_OSX_DEPLOYMENT_TARGET=14.0 \
@@ -57,7 +80,7 @@ cmake -B "$BUILD_DIR" \
     -DGGML_BLAS_DEFAULT=ON \
     -DGGML_METAL_USE_BF16=ON \
     -DGGML_OPENMP=OFF \
-    -DWHISPER_COREML=ON \
+    -DWHISPER_COREML=$CMAKE_COREML_FLAG \
     -DWHISPER_COREML_ALLOW_FALLBACK=ON \
     -S .
 
@@ -80,11 +103,10 @@ elif [ -f "$BUILD_DIR/src/libwhisper.coreml.a" ]; then
     COREML_LIB="$BUILD_DIR/src/libwhisper.coreml.a"
 fi
 
-# Helper to find lib
+# Helper to find lib (supports CMake Xcode generator output)
 find_lib() {
     local name=$1
     if [ -f "$BUILD_DIR/$name" ]; then echo "$BUILD_DIR/$name"; return 0; fi
-    # Check Release/ subdir (Xcode generator)
     local dir=$(dirname "$name")
     local base=$(basename "$name")
     if [ -f "$BUILD_DIR/$dir/Release/$base" ]; then echo "$BUILD_DIR/$dir/Release/$base"; return 0; fi
@@ -116,7 +138,7 @@ libtool -static -o "$BUILD_DIR/combined.a" "${LIBS[@]}" 2>/dev/null
 
 # Create dynamic library
 LINK_FRAMEWORKS="-framework Foundation -framework Metal -framework Accelerate"
-if [ -f "$COREML_LIB" ]; then
+if [ -n "$COREML_LIB" ]; then
     LINK_FRAMEWORKS="$LINK_FRAMEWORKS -framework CoreML"
 fi
 
@@ -190,17 +212,14 @@ echo "✅ whisper.framework built at: $FRAMEWORK_DIR"
 mkdir -p "$MODELS_OUT"
 
 if $USE_OFFICIAL; then
-    # Official whisper model path
     MODEL="${OFFICIAL_MODEL:-base.en}"
     echo ""
     echo "📥 Downloading official model: ggml-$MODEL..."
     bash models/download-ggml-model.sh "$MODEL"
     cp "$WHISPER_CPP_DIR/models/ggml-$MODEL.bin" "$MODELS_OUT/"
     echo "✅ Model copied: ggml-$MODEL.bin"
-    echo ""
-    echo "⚠️  Remember to update AppState.swift forResource to: \"ggml-$MODEL\""
 else
-    # BreezeASR25 (default)
+    # BreezeASR25
     if [ -f "$MODELS_OUT/ggml-breeze-asr25.bin" ]; then
         echo ""
         echo "✅ Model already exists: ggml-breeze-asr25.bin (skipping download)"
@@ -208,26 +227,19 @@ else
         echo ""
         echo "📥 Downloading BreezeASR25 from HuggingFace..."
 
-        # Check dependencies
-        if ! python3 -c "import transformers, safetensors" 2>/dev/null; then
-            echo "📦 Installing Python dependencies..."
-            pip3 install transformers 'safetensors[torch]'
+        # Install deps via uv
+        if ! "$EXT_PYTHON" -c "import transformers, safetensors, huggingface_hub" 2>/dev/null; then
+            echo "📦 Installing Python dependencies with uv..."
+            uv_install transformers 'safetensors[torch]' huggingface_hub
         fi
-        if ! command -v huggingface-cli &>/dev/null && ! command -v hf &>/dev/null; then
-            echo "📦 Installing huggingface-hub..."
-            pip3 install huggingface-hub
-        fi
-
+        
         BREEZE_DIR="$SCRIPT_DIR/.breeze-asr25-tmp"
         mkdir -p "$BREEZE_DIR"
 
-        # Download HF config files + model
         echo "⬇️  Downloading model files (≈3GB)..."
-        if command -v hf &>/dev/null; then
-            HF_CMD="hf"
-        else
-            HF_CMD="huggingface-cli"
-        fi
+        # Use venv huggingface-cli
+        HF_CMD="$SCRIPT_DIR/.venv/bin/huggingface-cli"
+        
         $HF_CMD download MediaTek-Research/Breeze-ASR-25 \
             --include "*.safetensors" "config.json" "vocab.json" "added_tokens.json" \
                       "tokenizer.json" "preprocessor_config.json" "special_tokens_map.json" \
@@ -235,30 +247,25 @@ else
             --exclude "optimizer.bin" "whisper-github/*" \
             --local-dir "$BREEZE_DIR"
 
-        # Convert to GGML
         echo ""
         echo "🔄 Converting safetensors → GGML format..."
 
-        # Need openai-whisper for mel_filters.npz
-        if ! python3 -c "import whisper" 2>/dev/null; then
-            pip3 install openai-whisper
+        if ! "$EXT_PYTHON" -c "import whisper" 2>/dev/null; then
+            uv_install openai-whisper
         fi
 
-        WHISPER_PKG_DIR=$(python3 -c "import whisper, os; print(os.path.dirname(os.path.dirname(whisper.__file__)))")
-        python3 "$WHISPER_CPP_DIR/models/convert-h5-to-ggml.py" "$BREEZE_DIR" "$WHISPER_PKG_DIR" "$MODELS_OUT"
+        WHISPER_PKG_DIR=$("$EXT_PYTHON" -c "import whisper, os; print(os.path.dirname(os.path.dirname(whisper.__file__)))")
+        "$EXT_PYTHON" "$WHISPER_CPP_DIR/models/convert-h5-to-ggml.py" "$BREEZE_DIR" "$WHISPER_PKG_DIR" "$MODELS_OUT"
 
-        # Rename to descriptive name
         mv "$MODELS_OUT/ggml-model.bin" "$MODELS_OUT/ggml-breeze-asr25.bin"
-
-        # Cleanup
+        
         echo "🧹 Cleaning up temp files..."
         rm -rf "$BREEZE_DIR"
-
         echo "✅ Model ready: ggml-breeze-asr25.bin"
     fi
 fi
 
-# ─── CoreML model conversion (optional) ───
+# ─── CoreML conversion ───
 
 if $USE_COREML; then
     COREML_OUT="$MODELS_OUT/ggml-breeze-asr25-encoder.mlmodelc"
@@ -271,36 +278,28 @@ if $USE_COREML; then
         echo "🧠 Converting model to CoreML format (Neural Engine acceleration)..."
         echo "   This requires ~10GB RAM and a few minutes."
 
-        # Install Python deps for CoreML conversion
-        PYTHON3="python3"
-        if [ -d "$SCRIPT_DIR/.venv" ]; then
-            PYTHON3="$SCRIPT_DIR/.venv/bin/python3"
+        # Install deps
+        if ! "$EXT_PYTHON" -c "import coremltools, torch, transformers, ane_transformers" 2>/dev/null; then
+            echo "📦 Installing CoreML conversion dependencies with uv..."
+            uv_install 'torch>=2.1' coremltools openai-whisper transformers ane_transformers 'numpy<2'
         fi
 
-        # Check/install deps
-        if ! $PYTHON3 -c "import coremltools, torch, transformers" 2>/dev/null; then
-            echo "📦 Installing CoreML conversion dependencies..."
-            echo "   (torch, coremltools, transformers, openai-whisper)"
-            $PYTHON3 -m pip install 'torch>=2.1' coremltools openai-whisper transformers ane_transformers 'numpy<2'
-        fi
-
-        # Convert HuggingFace model → CoreML .mlpackage
+        # Convert
         cd "$WHISPER_CPP_DIR"
-        $PYTHON3 models/convert-h5-to-coreml.py \
+        "$EXT_PYTHON" models/convert-h5-to-coreml.py \
             --model-name large-v2 \
             --model-path MediaTek-Research/Breeze-ASR-25 \
             --encoder-only True
 
-        # Compile .mlpackage → .mlmodelc
+        # Compile
         echo "🔧 Compiling CoreML model..."
         if command -v xcrun && xcrun --find coremlc &>/dev/null; then
-            # Full Xcode — use coremlc
             xcrun coremlc compile models/coreml-encoder-large-v2.mlpackage models/
             rm -rf "$COREML_OUT"
             mv models/coreml-encoder-large-v2.mlmodelc "$COREML_OUT"
         else
-            # Command Line Tools only — use coremltools Python
-            $PYTHON3 -c "
+            # Fallback using python coremltools
+             "$EXT_PYTHON" -c "
 import coremltools as ct, shutil, os
 model = ct.models.MLModel('models/coreml-encoder-large-v2.mlpackage')
 compiled = model.get_compiled_model_path()
@@ -311,14 +310,10 @@ print(f'Compiled to: {dest}')
 "
         fi
 
-        # Cleanup intermediate files
         rm -rf models/coreml-encoder-large-v2.mlpackage models/hf-large-v2.pt
-
         echo "✅ CoreML model ready: ggml-breeze-asr25-encoder.mlmodelc"
     fi
 fi
-
-# ─── Done ───
 
 echo ""
 echo "════════════════════════════════════════════════════════"

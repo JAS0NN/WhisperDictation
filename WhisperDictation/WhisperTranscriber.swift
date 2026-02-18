@@ -4,11 +4,18 @@ class WhisperTranscriber {
     private var whisperContext: WhisperContext?
 
     func loadModel(path: String) async {
+        print("⏳ Loading model from: \(path)")
+        
         do {
-            whisperContext = try WhisperContext.createContext(path: path)
-            print("✅ Model loaded: \(path)")
+            // Offload the heavy C++ loading to a background thread
+            let context = try await Task.detached(priority: .userInitiated) {
+                return try WhisperContext.createContext(path: path)
+            }.value
+            
+            whisperContext = context
+            print("✅ Model loaded successfully")
         } catch {
-            print("❌ Failed to load model: \(error)")
+             print("❌ Failed to load model: \(error)")
         }
     }
 
