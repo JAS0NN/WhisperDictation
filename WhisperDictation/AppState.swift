@@ -47,7 +47,7 @@ class AppState: ObservableObject {
         switch status {
         case .idle: return "mic"
         case .recording: return "mic.fill"
-        case .transcribing: return "ellipsis.circle"
+        case .transcribing: return "waveform.badge.magnifyingglass"
         case .error: return "exclamationmark.triangle"
         }
     }
