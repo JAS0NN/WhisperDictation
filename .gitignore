@@ -1,5 +1,9 @@
 # Build artifacts
 build/
+AppIcon.iconset/
+AppIcon.png
+*.pyc
+__pycache__/
 DerivedData/
 
 # Xcode
