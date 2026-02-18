@@ -14,6 +14,8 @@ class AppState: ObservableObject {
 
     @Published var status: DictationStatus = .idle
     @Published var statusMessage: String = "Initializing..."
+    @Published var usePunctuation: Bool = true
+    @Published var audioLevel: Float = 0.0
 
     private var audioRecorder: AudioRecorder?
     private let transcriber = WhisperTranscriber()
@@ -64,6 +66,21 @@ class AppState: ObservableObject {
 
         do {
             audioRecorder = AudioRecorder()
+            
+            // Link VAD silence detection
+            audioRecorder?.onSilenceDetected = { [weak self] in
+                Task { @MainActor in
+                    await self?.stopRecordingAndTranscribe()
+                }
+            }
+            
+            // Link Audio Metering for UI
+            audioRecorder?.onAudioLevelUpdate = { [weak self] level in
+                Task { @MainActor in
+                    self?.audioLevel = level
+                }
+            }
+            
             try audioRecorder?.startRecording()
         } catch {
             status = .error(error.localizedDescription)
@@ -85,7 +102,15 @@ class AppState: ObservableObject {
         status = .transcribing
         statusMessage = "⏳ Transcribing..."
 
-        let text = await transcriber.transcribe(fileURL: fileURL)
+        // Punctuation Control
+        // Enabled: Prompt with mixed English/Chinese punctuation.
+        // Disabled: Prompt with lowercase/no punctuation in both languages.
+        let prompt = usePunctuation 
+            ? "Hello, 歡迎來到我的演講。我會說得清晰，並使用正確的標點符號。" 
+            : "hello ni hao how are you i hope you are doing well today no punctuation here"
+        let noContext = !usePunctuation
+
+        let text = await transcriber.transcribe(fileURL: fileURL, prompt: prompt, noContext: noContext)
 
         if let text = text, !text.isEmpty {
             textInserter.insertText(text)

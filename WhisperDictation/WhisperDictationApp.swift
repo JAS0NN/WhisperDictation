@@ -1,11 +1,18 @@
 import SwiftUI
+import Combine
 
+@MainActor
 class AppDelegate: NSObject, NSApplicationDelegate {
     private var hotkeyManager: HotkeyManager?
+    private var floatingWindowController: FloatingIndicatorWindowController?
+    private var stateObservation: Any?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         print("🚀 App launched — setting up hotkey manager")
         let state = AppState.shared
+        
+        // Initialize Floating Window
+        floatingWindowController = FloatingIndicatorWindowController(rootView: FloatingIndicatorView())
 
         hotkeyManager = HotkeyManager(
             onRecordStart: {
@@ -21,6 +28,30 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         // Load model
         state.loadModelFromBundle()
+        
+        setupStateObservation()
+    }
+}
+
+extension AppDelegate {
+    func setupStateObservation() {
+        let state = AppState.shared
+        // Keep a reference to the cancellable
+        self.stateObservation = state.$status
+            .receive(on: RunLoop.main)
+            .sink { [weak self] status in
+                guard let self = self, let window = self.floatingWindowController?.window else { return }
+                
+                if status == .recording || status == .transcribing {
+                    if !window.isVisible {
+                        window.orderFront(nil)
+                    }
+                } else {
+                    if window.isVisible {
+                        window.orderOut(nil)
+                    }
+                }
+            }
     }
 }
 
@@ -57,6 +88,12 @@ struct WhisperDictationApp: App {
                     .lineLimit(3)
                     .frame(maxWidth: .infinity, alignment: .leading)
 
+                Divider()
+
+                Toggle("Punctuation", isOn: $appState.usePunctuation)
+                    .toggleStyle(.switch)
+                    .font(.subheadline)
+                
                 Divider()
 
                 VStack(alignment: .leading, spacing: 4) {

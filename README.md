@@ -19,7 +19,7 @@ macOS 原生語音輸入工具 — 住在 menubar，按住快捷鍵錄音、放�
 - macOS 14.0+, Apple Silicon (arm64)
 - Xcode Command Line Tools（`xcode-select --install`）
 - CMake（`brew install cmake`）
-- Python 3（模型轉換需要）
+- uv（用於管理 Python 環境，setup.sh 會自動處理）
 
 > 不需要完整 Xcode app。`setup.sh` 會自動使用 CMake (Command Line Tools) 來編譯 macOS 專用的 framework。
 
@@ -60,10 +60,11 @@ open WhisperDictation.xcodeproj   # ⌘R
 ./setup.sh --coreml
 ```
 
-這會將模型額外轉換成 CoreML 格式（~1.2GB）。whisper.cpp 會自動偵測並使用，不需要改任何程式碼。需要額外 Python 套件（torch, coremltools），建議先建虛擬環境：
+這會將模型額外轉換成 CoreML 格式（~1.2GB）。
+
+`setup.sh` 會自動使用 **uv** 來建立隔離的 Python 環境並安裝所需套件（torch, coremltools），不影響系統環境。
+
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
 ./setup.sh --coreml
 ```
 

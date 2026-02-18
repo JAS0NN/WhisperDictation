@@ -17,9 +17,10 @@ actor WhisperContext {
         whisper_free(context)
     }
 
-    func fullTranscribe(samples: [Float]) {
+    func fullTranscribe(samples: [Float], prompt: String? = nil, noContext: Bool = true) {
         let maxThreads = max(1, min(8, cpuCount() - 2))
         var params = whisper_full_default_params(WHISPER_SAMPLING_GREEDY)
+        
         "auto".withCString { lang in
             params.print_realtime   = true
             params.print_progress   = false
@@ -29,16 +30,27 @@ actor WhisperContext {
             params.language         = lang
             params.n_threads        = Int32(maxThreads)
             params.offset_ms        = 0
-            params.no_context       = true
+            params.no_context       = noContext
             params.single_segment   = false
-
-            whisper_reset_timings(context)
-            samples.withUnsafeBufferPointer { samples in
-                if whisper_full(context, params, samples.baseAddress, Int32(samples.count)) != 0 {
-                    print("Failed to run the model")
-                } else {
-                    whisper_print_timings(context)
+            
+            let body = {
+                whisper_reset_timings(self.context)
+                samples.withUnsafeBufferPointer { samples in
+                    if whisper_full(self.context, params, samples.baseAddress, Int32(samples.count)) != 0 {
+                        print("Failed to run the model")
+                    } else {
+                        whisper_print_timings(self.context)
+                    }
                 }
+            }
+            
+            if let prompt = prompt {
+                prompt.withCString { p in
+                    params.initial_prompt = p
+                    body()
+                }
+            } else {
+                body()
             }
         }
     }

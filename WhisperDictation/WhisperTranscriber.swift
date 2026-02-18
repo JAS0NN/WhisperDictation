@@ -23,7 +23,7 @@ class WhisperTranscriber {
         whisperContext != nil
     }
 
-    func transcribe(fileURL: URL) async -> String? {
+    func transcribe(fileURL: URL, prompt: String? = nil, noContext: Bool = true) async -> String? {
         guard let context = whisperContext else {
             print("No model loaded")
             return nil
@@ -36,7 +36,7 @@ class WhisperTranscriber {
             
             print("Processing audio: \(samples.count) samples -> \(filteredSamples.count) samples (VAD)")
             
-            await context.fullTranscribe(samples: filteredSamples)
+            await context.fullTranscribe(samples: filteredSamples, prompt: prompt, noContext: noContext)
             let text = await context.getTranscription()
             return text.trimmingCharacters(in: .whitespacesAndNewlines)
         } catch {
