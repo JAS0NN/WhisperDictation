@@ -5,7 +5,26 @@ import Combine
 class AppDelegate: NSObject, NSApplicationDelegate {
     private var hotkeyManager: HotkeyManager?
     private var floatingWindowController: FloatingIndicatorWindowController?
+    private var settingsWindowController: NSWindowController?
     private var stateObservation: Any?
+
+    @objc func openSettings() {
+        if settingsWindowController == nil {
+            let window = NSWindow(
+                contentRect: NSRect(x: 0, y: 0, width: 300, height: 200),
+                styleMask: [.titled, .closable, .miniaturizable],
+                backing: .buffered,
+                defer: false
+            )
+            window.center()
+            window.title = "Preferences"
+            window.contentViewController = NSHostingController(rootView: SettingsView())
+            settingsWindowController = NSWindowController(window: window)
+        }
+        
+        settingsWindowController?.showWindow(nil)
+        NSApp.activate(ignoringOtherApps: true)
+    }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         print("🚀 App launched — setting up hotkey manager")
@@ -105,6 +124,14 @@ struct WhisperDictationApp: App {
                         .font(.caption)
                 }
                 .foregroundColor(.secondary)
+
+                Divider()
+
+                Button("Settings...") {
+                    // Open Settings Window
+                    NSApp.sendAction(#selector(AppDelegate.openSettings), to: nil, from: nil)
+                }
+                .keyboardShortcut(",")
 
                 Divider()
 

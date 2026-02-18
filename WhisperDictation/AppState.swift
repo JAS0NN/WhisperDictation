@@ -11,11 +11,33 @@ enum DictationStatus: Equatable {
 @MainActor
 class AppState: ObservableObject {
     static let shared = AppState()
+    
+    private init() {
+        // Load shortcut or default to Left Ctrl + Left Option
+        if let data = UserDefaults.standard.data(forKey: "recordShortcut"),
+           let loaded = try? JSONDecoder().decode(Shortcut.self, from: data) {
+            self.shortcut = loaded
+        } else {
+            // Default: Left Control (0x40001) + Left Option (0x80020)
+            // Note: raw values depend on NSEvent.ModifierFlags
+            // .control = 1<<18, .option = 1<<19
+            let mods = NSEvent.ModifierFlags.control.rawValue | NSEvent.ModifierFlags.option.rawValue
+            self.shortcut = Shortcut(keyCode: nil, modifiers: UInt64(mods))
+        }
+    }
 
     @Published var status: DictationStatus = .idle
     @Published var statusMessage: String = "Initializing..."
     @Published var usePunctuation: Bool = true
     @Published var audioLevel: Float = 0.0
+    
+    @Published var shortcut: Shortcut {
+        didSet {
+            if let data = try? JSONEncoder().encode(shortcut) {
+                UserDefaults.standard.set(data, forKey: "recordShortcut")
+            }
+        }
+    }
 
     private var audioRecorder: AudioRecorder?
     private let transcriber = WhisperTranscriber()
