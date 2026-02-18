@@ -60,6 +60,14 @@ cp "$INFO_PLIST" "$CONTENTS/Info.plist"
 /usr/libexec/PlistBuddy -c "Add :CFBundleExecutable string WhisperDictation" "$CONTENTS/Info.plist" 2>/dev/null || true
 /usr/libexec/PlistBuddy -c "Add :CFBundleName string WhisperDictation" "$CONTENTS/Info.plist" 2>/dev/null || true
 /usr/libexec/PlistBuddy -c "Add :CFBundlePackageType string APPL" "$CONTENTS/Info.plist" 2>/dev/null || true
+/usr/libexec/PlistBuddy -c "Add :CFBundlePackageType string APPL" "$CONTENTS/Info.plist" 2>/dev/null || true
+
+# ─── App Icon ───
+if [ -f "$SCRIPT_DIR/AppIcon.icns" ]; then
+    echo "==> Copying AppIcon.icns..."
+    cp "$SCRIPT_DIR/AppIcon.icns" "$CONTENTS/Resources/"
+    /usr/libexec/PlistBuddy -c "Add :CFBundleIconFile string AppIcon" "$CONTENTS/Info.plist" 2>/dev/null || true
+fi
 
 # ─── Embed whisper.framework ───
 
