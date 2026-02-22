@@ -49,8 +49,8 @@ class WhisperTranscriber {
     private func removeSilence(from samples: [Float], sampleRate: Int = 16000) -> [Float] {
         let windowDuration = 0.03 // 30ms window
         let windowSize = Int(Double(sampleRate) * windowDuration)
-        let silenceThreshold: Float = 0.05 // Adjusted amplitude threshold (~ -26dB) - increasing sensitivity
-        let paddingDuration = 0.3 // 300ms padding
+        let silenceThreshold: Float = 0.02 // Lowered to avoid clipping speech onset
+        let paddingDuration = 0.4 // 400ms padding to protect word boundaries
         let paddingSamples = Int(Double(sampleRate) * paddingDuration)
         
         var keptSamples = [Float]()
